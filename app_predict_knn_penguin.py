@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 # Load the penguin dataset (replace 'penguins.csv' with your data file)
 @st.cache_data  # Cache the dataset for faster loading
 def load_data():
-    df = pd.read_csv('penguins.csv')
+    df = pd.read_csv('/content/drive/MyDrive/LabTest726/penguins_size.csv')
     return df
 
 df = load_data()
