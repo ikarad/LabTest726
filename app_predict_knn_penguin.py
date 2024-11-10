@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.impute import SimpleImputer  # สำหรับกรอกข้อมูลที่หายไป
 
 # Function to load and prepare the data
 def load_data():
@@ -31,8 +31,17 @@ def train_knn_model(X_train, y_train):
     model.fit(X_train, y_train)
     return model
 
+# Function to handle missing values
+def handle_missing_values(df):
+    imputer = SimpleImputer(strategy='mean')  # ใช้ค่าเฉลี่ยในการกรอกข้อมูลที่หายไป
+    df_imputed = imputer.fit_transform(df)
+    return pd.DataFrame(df_imputed, columns=df.columns)
+
 # Load and prepare data
 df = load_data()
+
+# Handle missing values
+df = handle_missing_values(df)
 
 # Preprocess the data
 df, species_encoder, island_encoder, sex_encoder = encode_features(df)
