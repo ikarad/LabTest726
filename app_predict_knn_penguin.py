@@ -38,3 +38,13 @@ prediction = model.predict(user_input)
 # แสดงผลการทำนาย
 st.subheader('Prediction Result')
 st.write(f"The predicted species is: {prediction}")
+
+# เพิ่มปุ่มเพื่อทำนาย
+if st.button('Predict'):
+    # ทำนายผล
+    prediction = model.predict(user_input)
+
+    # แสดงผลการทำนาย
+    st.subheader('Prediction Result')
+    predicted_species = species_encoder.inverse_transform(prediction)
+    st.write(f"The predicted species is: {predicted_species[0]}")
