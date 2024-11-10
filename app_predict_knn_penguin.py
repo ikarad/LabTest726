@@ -33,9 +33,19 @@ def train_knn_model(X_train, y_train):
 
 # Function to handle missing values
 def handle_missing_values(df):
-    imputer = SimpleImputer(strategy='mean')  # ใช้ค่าเฉลี่ยในการกรอกข้อมูลที่หายไป
-    df_imputed = imputer.fit_transform(df)
-    return pd.DataFrame(df_imputed, columns=df.columns)
+    # Separate the numeric and categorical columns
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    categorical_cols = df.select_dtypes(include=[object]).columns
+    
+    # Use SimpleImputer to fill missing values in numeric columns with mean
+    imputer_numeric = SimpleImputer(strategy='mean')
+    df[numeric_cols] = imputer_numeric.fit_transform(df[numeric_cols])
+    
+    # Use SimpleImputer to fill missing values in categorical columns with the most frequent value
+    imputer_categorical = SimpleImputer(strategy='most_frequent')
+    df[categorical_cols] = imputer_categorical.fit_transform(df[categorical_cols])
+    
+    return df
 
 # Load and prepare data
 df = load_data()
@@ -88,4 +98,4 @@ st.write(f"The predicted species is: {predicted_species[0]}")
 
 # Display model accuracy
 accuracy = accuracy_score(y_test, y_pred)
-st.write(f"Model Accuracy: {accuracy:.2f}")
+st.write(f"Model Accuracy: {accura
