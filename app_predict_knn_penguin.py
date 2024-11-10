@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pickle
+import pandas as pd
 
 # โหลดโมเดลและตัวแปลงข้อมูล
 with open('model_penguin_726.pkl', 'rb') as file:
