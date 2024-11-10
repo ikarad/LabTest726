@@ -1,79 +1,30 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
+import pickle
 
-# Load the penguin dataset (replace 'penguins.csv' with your data file)
-@st.cache_data  # Cache the dataset for faster loading
-def load_data():
-    df = pd.read_csv('penguins_size.csv')
-    return df
+# โหลดโมเดลและตัวแปลงข้อมูล
+with open('model_penguin_726.pkl', 'rb') as file:
+    model, species_encoder, island_encoder, sex_encoder = pickle.load(file)
 
-df = load_data()
+# รับค่าจากผู้ใช้
+culmen_length = st.sidebar.number_input('Culmen Length (mm)', min_value=0.0, max_value=100.0, value=40.0)
+culmen_depth = st.sidebar.number_input('Culmen Depth (mm)', min_value=0.0, max_value=100.0, value=20.0)
+flipper_length = st.sidebar.number_input('Flipper Length (mm)', min_value=0.0, max_value=100.0, value=190.0)
+body_mass = st.sidebar.number_input('Body Mass (g)', min_value=0.0, max_value=10000.0, value=3500.0)
+island = st.sidebar.selectbox('Island', options=['Torgersen', 'Biscoe', 'Dream'])
+sex = st.sidebar.selectbox('Sex', options=['MALE', 'FEMALE'])
 
-# Preprocessing steps
-def preprocess_data(df):
-    # Separate features and target
-    X = df[['island', 'bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex']]
-    y = df['species']
+# เตรียมข้อมูลผู้ใช้สำหรับการทำนาย
+user_input = np.array([culmen_length, culmen_depth, flipper_length, body_mass, island, sex]).reshape(1, -1)
 
-    # Split data into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# แปลงข้อมูลของผู้ใช้
+user_input[:, 4] = island_encoder.transform(user_input[:, 4])  # island encoding
+user_input[:, 5] = sex_encoder.transform(user_input[:, 5])  # sex encoding
 
-    # Define categorical and numerical features
-    categorical_features = ['island', 'sex']
-    numerical_features = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g']
+# ทำนายผล
+prediction = model.predict(user_input)
+predicted_species = species_encoder.inverse_transform(prediction)
 
-    # Create transformers
-    numerical_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='mean')),
-        ('scaler', StandardScaler()),
-    ])
-
-    categorical_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='most_frequent')),
-        ('onehot', OneHotEncoder(sparse_output=False, handle_unknown='ignore')),
-    ])
-
-    # Combine transformers using ColumnTransformer
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', numerical_transformer, numerical_features),
-            ('cat', categorical_transformer, categorical_features),
-        ])
-
-    return X_train, X_test, y_train, y_test, preprocessor
-
-X_train, X_test, y_train, y_test, preprocessor = preprocess_data(df)
-
-# Train the KNN model
-model = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('classifier', KNeighborsClassifier(n_neighbors=5)),  # You can adjust n_neighbors
-])
-model.fit(X_train, y_train)
-
-# Streamlit app
-st.title('Penguin Species Prediction')
-
-# Input features
-island = st.selectbox('Island', df['island'].unique())
-bill_length_mm = st.number_input('Bill Length (mm)', min_value=0.0)
-bill_depth_mm = st.number_input('Bill Depth (mm)', min_value=0.0)
-flipper_length_mm = st.number_input('Flipper Length (mm)', min_value=0.0)
-body_mass_g = st.number_input('Body Mass (g)', min_value=0.0)
-sex = st.selectbox('Sex', df['sex'].unique())
-
-# Create input data for prediction
-input_data = pd.DataFrame([[island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex]],
-                         columns=['island', 'bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex'])
-
-# Make prediction
-if st.button('Predict'):
-    prediction = model.predict(input_data)[0]
-    st.success(f'Predicted Species: **{prediction}**')
+# แสดงผลการทำนาย
+st.subheader('Prediction Result')
+st.write(f"The predicted species is: {predicted_species[0]}")
