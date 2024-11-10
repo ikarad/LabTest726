@@ -30,7 +30,8 @@ x_new['body_mass_g'] = [body_mass]
 x_new['sex'] = [sex]
 x_new['island'] = island_encoder.transform(x_new['island'])
 x_new['sex'] = sex_encoder.transform(x_new['sex'])
-
+# แสดงผลการทำนาย
+st.subheader('Penguin Species Prediction')
 # เพิ่มปุ่มเพื่อทำนาย
 if st.button('Predict'):
     # ทำนายผล
