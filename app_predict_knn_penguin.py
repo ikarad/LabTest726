@@ -33,8 +33,8 @@ x_new['sex'] = sex_encoder.transform(x_new['sex'])
 
 # ทำนายผล
 prediction = model.predict(user_input)
-predicted_species = species_encoder.inverse_transform(prediction)
+# predicted_species = species_encoder.inverse_transform(prediction)
 
 # แสดงผลการทำนาย
 st.subheader('Prediction Result')
-st.write(f"The predicted species is: {predicted_species[0]}")
+st.write(f"The predicted species is: {prediction}")
