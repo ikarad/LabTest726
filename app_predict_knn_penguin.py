@@ -31,14 +31,6 @@ x_new['sex'] = [sex]
 x_new['island'] = island_encoder.transform(x_new['island'])
 x_new['sex'] = sex_encoder.transform(x_new['sex'])
 
-# ทำนายผล
-prediction = model.predict(user_input)
-# predicted_species = species_encoder.inverse_transform(prediction)
-
-# แสดงผลการทำนาย
-st.subheader('Prediction Result')
-st.write(f"The predicted species is: {prediction}")
-
 # เพิ่มปุ่มเพื่อทำนาย
 if st.button('Predict'):
     # ทำนายผล
